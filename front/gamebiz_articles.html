@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>gamebiz</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .user-photo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      # object-fit: cover;
+      # margin-bottom: 12px;
+    }
+
+    .user-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      # margin: 5;
+      # display: flex;
+      display: block;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    label {
+      font-size: 1.2rem; /* Increase font size */
+      margin-right: 0.5rem;
+    }
+
+    select {
+      font-size: 1.2rem; /* Match label size */
+      padding: 0.4rem 0.6rem; /* Make the dropdown bigger */
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 10px;
+      padding: 1rem;
+      height: 80px;
+      border-bottom: 1px solid #ccc;
+      background: linear-gradient(120deg, #74ebd5, #acb6e5);
+      border-radius: 8px;
+    }
+
+    .container {
+      # flex-direction: column;
+      display: flex;
+      width: 100%;
+      height: calc(100vh - 80px);
+    }
+
+    .sidebar {
+      # flex: 1;
+      # width: 35%;
+      width: 290px;
+      # max-width: 400px;
+      border-right: 1px solid #ccc;
+      overflow-y: auto;
+      padding: 1rem;
+      # background-color: #f9f9f9;
+      background-color: white;
+      margin: 10px 10px 10px 0px;
+    }
+
+    .post-item {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+      # background: white;
+      background: #99CCFF
+    }
+
+    .post-item:hover {
+      background-color: #FFE5CC;
+    }
+
+    .post-item.selected {
+      background-color: #eef;
+    }
+
+    .detail {
+      flex: 1;
+      flex-grow: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .detail textarea {
+      width: 100%;
+      height: 150px;
+      padding: 0.8rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .photos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .photos img, video {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width: 768px) {
+      body, .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        max-width: none;
+        border-right: none;
+        border-bottom: 1px solid #ccc;
+        height: 200px;
+      }
+      .detail {
+        height: calc(100vh - 200px);
+      }
+    }
+
+    .auto-expand {
+      width: 100%;
+      border: 1px solid #ccc;
+      padding: 8px;
+      resize: none;          /* 禁止手动拖动 */
+      overflow: hidden;      /* 永远不显示滚动条 */
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1 style="margin:0;">gamebiz記事 - 中山淳雄の「推しもオタクもグローバル」</h1>
+    </div>
+    <div style="display: flex; align-items: center;">
+      <span id="welcomeText"></span>
+      <a href="#" id="signOut" style="
+          color: white;
+          text-decoration: none;
+          background-color: #e53935;
+          padding: 0.4rem 0.8rem;
+          border-radius: 4px;
+          font-size: 0.9rem;
+          margin: 2rem;
+        ">Sign Out</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="sidebar" id="postList"></div>
+
+    <div class="detail">
+      <div id="postHeader"></div>
+      <div id="postBody"></div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("signOut").addEventListener("click", function(e) {
+      e.preventDefault();
+      // 清除 localStorage 中的 authToken 和 userName
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("naviPage");
+      window.location.href = "login.html";
+    });
+
+    window.onload = function () {
+      const token = localStorage.getItem("authToken");
+      console.log("Saved token:", localStorage.getItem("authToken"));
+
+      if (!token) {
+        // No token found, redirect to login page
+        localStorage.removeItem("authToken");
+        window.location.href = "login.html";
+        return;
+      }
+    }
+
+    let posts = [];
+    let selectedPost = null;
+    let user_id = null;
+
+    async function loadPosts() {
+      const params = new URLSearchParams(window.location.search);
+
+      try {
+        const res = await fetch(`https://api.sns-ap.com/gamebiz/articles`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("authToken")
+          }
+        });
+
+        if (res.status != '200') {
+          localStorage.removeItem("authToken");
+          window.location.href = "login.html";
+          return;
+        }
+
+        posts = await res.json();
+        displayPostList(posts);
+        const divHeader = document.getElementById("postHeader")
+        const divBody = document.getElementById("postBody")
+        divHeader.innerHTML=''
+        divBody.innerHTML=''
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+      }
+    }
+
+    function displayPostList(posts) {
+      const list = document.getElementById("postList");
+      list.innerHTML = "";
+
+      posts.forEach((post, index) => {
+        const div = document.createElement("div");
+        div.className = "post-item";
+        div.innerHTML = `
+          <p><strong>公開日時: ${post.publish_time}</strong></p>
+          <p>
+            記事ID: ${post.article_id}<br/>
+          </p>
+        `;
+        // div.onclick = () => showPostDetails(post, index);
+        div.onclick = () => {
+          // Remove previous selection
+          document.querySelectorAll(".post-item").forEach(el => el.classList.remove("selected"));
+          // Mark this item as selected
+          div.classList.add("selected");
+          // Show post details
+          showPostDetails(post, index);
+        };
+        list.appendChild(div);
+      });
+    }
+
+    async function showPostDetails(post, index) {
+      selectedPost = post;
+      const articleId = post.article_id;
+
+      if (!articleId) {
+        alert("Missing article id");
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://api.sns-ap.com/gamebiz/articles/${articleId}`,{
+          method: "GET",
+          headers: {
+            "Authorization": "Bearer " + localStorage.getItem("authToken")
+          }
+        });
+
+        if (res.status != '200') {
+          localStorage.removeItem("authToken");
+          window.location.href = "login.html";
+          return;
+        }
+
+        const data = await res.json();
+
+        // Update content fields
+        const divHeader = document.getElementById("postHeader")
+        const divBody = document.getElementById("postBody")
+
+        divBody.innerHTML = `
+          <b>記事内容(中国語):</b><br /><br />
+          <textarea readonly id="postContentZH" class="auto-expand" placeholder="Select a post to view/edit chinese content"></textarea>
+          <div class="photos" id="postPhotos"></div>
+          <div class="photos" id="postVideos"></div>
+
+          <b>記事内容(日本語):</b><br /><br />
+          <textarea readonly id="postContentJA" class="auto-expand" placeholder="Select a post to view japanese content"></textarea>
+        `;
+
+        document.getElementById("postContentZH").value = data.post_zh || "(无中文内容)";
+        document.getElementById("postContentJA").value = data.post_ja || "(日本語コンテンツなし)";
+
+        const textareaZH = document.getElementById('postContentZH');
+        textareaZH.style.height = 'auto';
+        textareaZH.style.height = textareaZH.scrollHeight + 'px';
+
+        const textareaJA = document.getElementById('postContentJA');
+        textareaJA.style.height = 'auto';
+        textareaJA.style.height = textareaJA.scrollHeight + 'px';
+
+        // Update images
+        const photos = document.getElementById("postPhotos");
+        photos.innerHTML = "";
+
+        if (Array.isArray(data.images)) {
+          data.images.forEach(url => {
+            const img = document.createElement("img");
+            img.src = url;
+            img.alt = "Post image";
+            photos.appendChild(img);
+          });
+        }
+
+      } catch (err) {
+        console.error("Failed to load post details:", err);
+        alert("Error loading post details.");
+      }
+    }
+
+    loadPosts();
+    // initDates();
+  </script>
+</body>
+</html>

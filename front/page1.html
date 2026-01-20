@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ユーザー一覧</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f8fa;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 16px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background-color: #fff;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+
+    .loading {
+      margin-top: 20px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+<h1>ユーザー一覧</h1>
+<div class="loading" id="loading"></div>
+
+<table id="userTable" style="display:none;">
+  <thead>
+    <tr>
+      <th>ユーザー名</th>
+      <th>姓名</th>
+      <th>Email</th>
+      <th>会社名</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+</body>
+</html>

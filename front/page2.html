@@ -1,0 +1,273 @@
+<head>
+  <style>
+    .container {
+      # background-color: #FAE7E7;
+      background: #CCE5FF;
+      padding: 10px 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100%;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #333;
+    }
+    input {
+      width: 32%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    input:focus {
+      border-color: #333;
+      outline: none;
+    }
+    .error {
+      color: red;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+    .page2button {
+      margin: 15px;
+      width: 10rem;
+      padding: 12px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #888;
+      cursor: not-allowed;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    # body {
+    #   font-family: Arial, sans-serif;
+    #   padding: 20px;
+    # }
+
+    .user-card {
+      # background: #FAE7E7;
+      background: #CCE5FF;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-photo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .user-info a {
+      color: blue;
+      text-decoration: none;
+    }
+    .user-info a:hover {
+      text-decoration: underline;
+    }
+
+    .weibo-login-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #e6162d; /* 微博红 */
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      text-decoration: none;
+      width: auto;  /* 自适应内容宽度 */
+      max-width: 250px; /* 可选，避免过宽 */
+    }
+
+    .weibo-login-btn:hover {
+      background-color: #c81023;
+    }
+
+    .weibo-login-btn img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .radio-locked {
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      gap: 3px; /* label 和 select 的间距 */
+    }
+
+    .form-row label {
+      white-space: nowrap; /* 防止换行 */
+      min-width: 100px;    /* 日本表单常见对齐用 */
+    }
+
+  </style>
+</head>
+<body>
+
+
+
+<div class="container">
+    <h2>申し込み情報登録</h2>
+    <form id="accountRegisterForm" onsubmit="handleAccountRegister(event)">
+      <div class="form-group">
+        <label for="customerName">顧客名 *</label>
+        <input type="text" id="customerName" name="customerName" required>
+        <div class="error" id="customerNameError"></div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-start; gap: 1rem; margin-bottom: 15px;">
+        <label for="japanSnsName">日本SNS投稿情報源 *</label>
+        <label style="display: inline-flex; align-items: center; gap: 0.25rem;">
+          <input type="radio" name="japanSnsName" value="x" checked onchange="onJapanSnsChange(this)" /> X
+        </label>
+        <label style="display: inline-flex; align-items: center; gap: 0.25rem;">
+          <input type="radio" name="japanSnsName" value="instagram" onchange="onJapanSnsChange(this)" /> Instagram
+        </label>
+      </div>
+      <div class="form-group">
+        <p>
+          <label>Xアカウント新規作成：
+            <a href="https://x.com/signup" target="_blank" style="color: #1a73e8;">https://x.com/signup</a>
+          </label>
+          <label>Instagramアカウント新規作成：
+            <a href="https://www.instagram.com/" target="_blank" style="color: #1a73e8;">https://www.instagram.com/</a>
+          </label>
+        </p>
+        <label for="japanSnsUrl">投稿情報取得URL *</label>
+        <input type="text" id="japanSnsUrl" name="japanSnsUrl" placeholder="https://x.com/nm_nanaparty" title="https://x.com/nm_nanaparty" required>
+        <div class="error" id="japanSnsUrlError"></div>
+      </div>
+      <div style="display: flex; justify-content: flex-start; gap: 1rem; margin-bottom: 15px;">
+        <label for="chinaSnsName">中国SNS投稿先 *</label>
+        <label style="display: inline-flex; align-items: center; gap: 0.25rem;">
+          <input type="radio" name="chinaSnsName" value="weibo" checked class="radio-locked" /> Weibo
+        </label>
+        <label style="display: inline-flex; align-items: center; gap: 0.25rem;">
+          <input type="radio" name="chinaSnsName" value="xiaohongshu" class="radio-locked" /> Xiaohongshu
+        </label>
+      </div>
+      <div class="form-group">
+        <p>
+          <label>Weiboアカウント新規作成：
+            <a href="https://www.weibo.com/signup/mobile.php" target="_blank" style="color: #1a73e8;">https://www.weibo.com/signup/mobile.php</a>
+          </label>
+          <label>Xiaohongshuアカウント新規作成(Android)：
+            <a href="https://play.google.com/store/apps/details?id=com.xingin.xhs" target="_blank" style="color: #1a73e8;">https://play.google.com/store/apps/details?id=com.xingin.xhs</a>
+          </label>
+          <label>Xiaohongshuアカウント新規作成(IOS)：
+            <a href="https://apps.apple.com/cn/app/小红书-你的生活兴趣社区/id741292507" target="_blank" style="color: #1a73e8;">https://apps.apple.com/cn/app/小红书-你的生活兴趣社区/id741292507</a>
+          </label>
+        </p>
+        <label for="chinaSnsUrl">投稿先アクセスURL *</label>
+        <input type="text" id="chinaSnsUrl" name="chinaSnsUrl" placeholder="https://weibo.com/6623739479" title="https://weibo.com/6623739479" required>
+        <div class="error" id="chinaSnsUrlError"></div>
+      </div>
+      <div class="form-group">
+        <label for="forbidKeyword">炎上防止キーワード(半角コンマで区切る)　任意</label>
+        <input type="text" id="forbidKeyword" name="forbidKeyword">
+        <div class="error" id="forbidKeywordError"></div>
+      </div>
+      <div style="display: flex; justify-content: flex-start; gap: 1rem; margin-bottom: 15px;">
+        <label for="accountValidFlag">アカウント有効フラグ *</label>
+        <label style="display: inline-flex; align-items: center; white-space: nowrap; gap: 0.25rem;">
+          <input type="radio" name="accountValidFlag" value="yes" checked /> 有効
+        </label>
+        <label style="display: inline-flex; align-items: center; white-space: nowrap; gap: 0.25rem;">
+          <input type="radio" name="accountValidFlag" value="no" /> 無効
+        </label>
+      </div>
+      <div style="display: none; justify-content: flex-start; gap: 1rem; margin-bottom: 15px;">
+        <label for="autoPost">自動投稿 *</label>
+        <label style="display: inline-flex; align-items: center; white-space: nowrap; gap: 0.25rem;">
+          <input type="radio" name="autoPost" value="yes" checked /> 要
+        </label>
+        <label style="display: inline-flex; align-items: center; white-space: nowrap; gap: 0.25rem;">
+          <input type="radio" name="autoPost" value="no" /> 不要
+        </label>
+      </div>
+      <div style="display: flex; justify-content: flex-start; white-space: nowrap; gap: 1rem; margin-bottom: 15px;">
+        <label for="manualPost">手動中国SNSに投稿機能 *</label>
+        <label style="display: inline-flex; align-items: center; gap: 0.25rem;">
+          <input type="radio" name="manualPost" value="yes" checked /> on
+        </label>
+        <label style="display: inline-flex; align-items: center; white-space: nowrap; gap: 0.25rem;">
+          <input type="radio" name="manualPost" value="no" /> off
+        </label>
+      </div>
+
+      <!-- サービス内容 -->
+      <div style="display: flex; justify-content: flex-start; white-space: nowrap; gap: 1rem; margin-bottom: 15px;">
+        <label>ご利用プラン：　月額課金プラン</label>
+      </div>
+
+      <div style="display: flex; justify-content: flex-start; white-space: nowrap; gap: 1rem; margin-bottom: 15px;">
+        <label>決済金額（税込）：　¥3,300</label>
+      </div>
+
+      <!-- 支払い方法の選択 -->
+      <div class="form-row">
+        <label for="paymentMethod">決済方法：</label>
+        <select id="paymentMethod">
+          <option value="クレジットカード">クレジットカード</option>
+          <option value="PayPay">PayPay</option>
+          <option value="コンビニ決済">コンビニ決済</option>
+          <option value="請求書（郵送）払い">請求書（郵送）払い</option>
+        </select>
+        <a style="margin-left: 15px;" href="payment.html" target="_blank">今すぐ決済</a>
+      </div>
+
+      <!--
+      <div id="creditCardFields" style="display:none; margin-top:12px;">
+        <label style="margin-top:20px;" for="cardName">カード名義人（ローマ字）：</label>
+        <input type="text" id="cardName" name="cardName" placeholder="TARO YAMADA" autocomplete="cc-name">
+
+        <label style="margin-top:20px;" for="cardNumber">カード番号：</label>
+        <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" autocomplete="cc-number">
+
+        <label style="margin-top:20px;" for="expiryDate">有効期限（MM/YY）：</label>
+        <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" autocomplete="cc-exp">
+
+        <label style="margin-top:20px;" for="cvc">セキュリティコード（CVC）：</label>
+        <input type="password" id="cvc" name="cvc" placeholder="123" inputmode="numeric" autocomplete="cc-csc">
+      </div>
+      -->
+
+      <button type="submit" class="page2button">登録</button>
+    </form>
+</div>
+
+<h2>申し込み情報一覧</h2>
+<div id="accounts-container"></div>
+
+</body>

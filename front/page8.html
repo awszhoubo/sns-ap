@@ -1,0 +1,406 @@
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>手動投稿(Xiaohongshu)</title>
+  <style>
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 10px;
+      padding: 1rem;
+      height: 80px;
+      border-bottom: 1px solid #ccc;
+      background: linear-gradient(120deg, #74ebd5, #acb6e5);
+      border-radius: 8px;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      display: block;
+      min-height: 100vh;   /* 允许超过一屏 */
+      overflow-y: auto;   /* 垂直滚动 */
+    }
+
+    .header-container {
+      position: relative;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    h1 {
+      text-align: center;
+      # color: #333;
+    }
+
+    .user-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .user-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 16px;
+      width: 100%;
+      max-width: 300px;
+      box-sizing: border-box;
+      transition: transform 0.2s;
+    }
+
+    .user-card:hover {
+      transform: scale(1.02);
+    }
+
+    .user-photo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 12px;
+    }
+
+    .user-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .user-profile {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .user-link a {
+      text-decoration: none;
+      color: #1da1f2;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .user-card {
+        max-width: 90%;
+      }
+    }
+
+    .bind-button-container {
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+    }
+
+    #bindXiaohongshuBtn {
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #ff4d4f;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #bindXiaohongshuBtn:hover {
+      background-color: #e04344;
+    }
+
+    #success-message {
+      text-align: center;
+      display: none;
+      color: green;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .chi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .save-btn {
+      margin-right: 1rem;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .detail {
+      flex: 1;
+      flex-grow: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .detail textarea {
+      width: 100%;
+      height: 150px;
+      padding: 0.8rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    #preview {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .img-container {
+      width: 160px;
+      height: 160px;
+      position: relative;   /* 关键 */
+      margin: 8px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #f5f5f5;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 16px;
+      line-height: 24px;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .img-container img,
+    .img-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;   /* 关键 */
+      display: block;
+    }
+
+    .img-container img:hover {
+      transform: scale(1.05);
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1 style="margin:0;">手動投稿(Xiaohongshu)</h1>
+    </div>
+    <div style="display: flex; align-items: center;">
+      <img class="user-photo" id="userPhoto" src="" />&nbsp;&nbsp;
+      <span class="user-name" id="userName"></span>
+    </div>
+  </header>
+
+  <div class="detail">
+      <div id="postBody">
+        <b>日本語:</b><br /><br />
+          <textarea id="postContentJA" placeholder="日本語で入力してください。"></textarea>
+
+          <div class="chi-header">
+            <b>中国語:</b>
+            <div class="button-group">
+              <button id="translateBtn" class="save-btn">中国語に翻訳</button>
+              <button id="selectImages" class="save-btn">画像・動画を選択</button>
+              <button id="manualPostXiaohongshuBtn" class="save-btn">REDへ投稿</button>
+            </div>
+          </div>
+
+          <textarea id="postContentZH" placeholder="翻訳された中国語を表示する。"></textarea>
+
+          <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display: none;">
+          <div id="preview"></div>
+      </div>
+  </div>
+
+
+  <script>
+    let selectedFileNames = [];
+    window.onload = function () {
+      const token = localStorage.getItem("authToken");
+      console.log("Saved token:", localStorage.getItem("authToken"));
+
+      if (!token) {
+        // No token found, redirect to login page
+        localStorage.removeItem("authToken");
+        window.location.href = "login.html";
+        return;
+      }
+    }
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const userId = params.get("userId");
+      const userName = params.get("userName");
+      const userPhoto = params.get("userPhoto");
+      const imgPhoto = document.getElementById("userPhoto")
+      const uName = document.getElementById("userName")
+      imgPhoto.src = `${userPhoto}`
+      uName.innerHTML = `${userName}`
+
+      document.getElementById('translateBtn').addEventListener('click', translate);
+      document.getElementById('manualPostXiaohongshuBtn').addEventListener('click', manualPostXiaohongshu);
+
+      initFileSelect();
+    }
+
+    async function translate() {
+      const text = document.getElementById("postContentJA").value.trim();
+      if (text == "") {
+        alert("日本語で入力してだくさい。");
+        return;
+      }
+      const response = await fetch('https://api.sns-ap.com/x/translate', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("authToken")
+        },
+        body: JSON.stringify({ text: text })
+      });
+      const data = await response.json();
+      document.getElementById("postContentZH").textContent = data.translated;
+    }
+
+    async function manualPostXiaohongshu() {
+      const postContentJA = document.getElementById("postContentJA").value.trim();
+      const postContentZH = document.getElementById("postContentZH").value.trim();
+      if (postContentZH == "") {
+        alert("中国語に翻訳してください。");
+        return;
+      }
+      const params = new URLSearchParams(window.location.search);
+      const userId = params.get("userId");
+      const payload = { userId, postContentZH, postContentJA, selectedFileNames }
+      try {
+        const response = await fetch('https://api.sns-ap.com/xiaohongshu/manual', {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("authToken")
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+
+        if (response.status == '200') {
+          document.getElementById("postContentJA").value = "";
+          document.getElementById("postContentZH").value = "";
+
+          const previewContainer = document.getElementById("preview");
+          const mediaElements = previewContainer.querySelectorAll("img, video");
+
+          mediaElements.forEach(el => {
+            if (el.tagName === "VIDEO") {
+              URL.revokeObjectURL(el.src); // 释放视频对象 URL
+            }
+          });
+
+          // 然后清空
+          previewContainer.innerHTML = "";
+
+          alert(data.post_result);
+        } else {
+          alert(data.post_result || '不明なエラー');
+        }
+      } catch (err) {
+        alert('リクエストに失敗しました: ' + err.message);
+      }
+      window.location.replace(window.location.href);
+    }
+
+    function initFileSelect() {
+      const fileInput = document.getElementById('fileInput');
+      const selectButton = document.getElementById('selectImages');
+      const previewContainer = document.getElementById('preview');
+
+      // 点击按钮触发文件选择
+      selectButton.addEventListener('click', () => {
+        fileInput.click();
+      });
+
+      // 文件选择后预览图片
+      fileInput.addEventListener('change', (event) => {
+        const files = Array.from(event.target.files);
+
+        files.forEach(file => {
+          if (
+            !file.type.startsWith('image/') &&
+            !file.type.startsWith('video/')
+          ) return;
+
+          if (!selectedFileNames.includes(file.name)) {
+            selectedFileNames.push(file.name);
+          }
+
+          const container = document.createElement('div');
+          container.classList.add('img-container');
+
+          const delBtn = document.createElement('button');
+          delBtn.classList.add('delete-btn');
+          delBtn.textContent = '×';
+
+          delBtn.addEventListener('click', () => {
+            const index = selectedFileNames.indexOf(file.name);
+            if (index > -1) selectedFileNames.splice(index, 1);
+            container.remove();
+          });
+
+          // ---------- 图片 ----------
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = e => {
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              container.appendChild(img);
+              container.appendChild(delBtn);
+              previewContainer.appendChild(container);
+            };
+            reader.readAsDataURL(file);
+          }
+
+          // ---------- 视频 ----------
+          else if (file.type.startsWith('video/')) {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.controls = true;
+            video.preload = 'metadata';
+            video.width = 200;
+
+            container.appendChild(video);
+            container.appendChild(delBtn);
+            previewContainer.appendChild(container);
+          }
+        });
+
+        // 清空 fileInput.value，方便下次可以重复选择同样的文件
+        fileInput.value = '';
+      });
+
+    }
+
+    init();
+  </script>
+</body>

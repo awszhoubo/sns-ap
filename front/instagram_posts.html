@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>投稿リスト(Instagram)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .user-photo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      # object-fit: cover;
+      # margin-bottom: 12px;
+    }
+
+    .user-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      # margin: 5;
+      # display: flex;
+      display: block;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    label {
+      font-size: 1.2rem; /* Increase font size */
+      margin-right: 0.5rem;
+    }
+
+    select {
+      font-size: 1.2rem; /* Match label size */
+      padding: 0.4rem 0.6rem; /* Make the dropdown bigger */
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 10px;
+      padding: 1rem;
+      height: 80px;
+      border-bottom: 1px solid #ccc;
+      background: linear-gradient(120deg, #74ebd5, #acb6e5);
+      border-radius: 8px;
+    }
+
+    .container {
+      # flex-direction: column;
+      display: flex;
+      width: 100%;
+      height: calc(100vh - 80px);
+    }
+
+    .sidebar {
+      # flex: 1;
+      # width: 35%;
+      width: 290px;
+      # max-width: 400px;
+      border-right: 1px solid #ccc;
+      overflow-y: auto;
+      padding: 1rem;
+      # background-color: #f9f9f9;
+      background-color: white;
+      margin: 10px 10px 10px 0px;
+    }
+
+    .post-item {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+      # background: white;
+      background: #99CCFF
+    }
+
+    .post-item:hover {
+      background-color: #FFE5CC;
+    }
+
+    .post-item.selected {
+      background-color: #eef;
+    }
+
+    .detail {
+      flex: 1;
+      flex-grow: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .detail textarea {
+      width: 100%;
+      height: 150px;
+      padding: 0.8rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .photos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .photos img, video {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .chi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .save-btn {
+      margin-right: 1rem;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      body, .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        max-width: none;
+        border-right: none;
+        border-bottom: 1px solid #ccc;
+        height: 200px;
+      }
+      .detail {
+        height: calc(100vh - 200px);
+      }
+    }
+
+    .auto-expand {
+      width: 100%;
+      border: 1px solid #ccc;
+      padding: 8px;
+      resize: none;          /* 禁止手动拖动 */
+      overflow: hidden;      /* 永远不显示滚动条 */
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .preview-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .preview-overlay img {
+      max-width: 90%;
+      max-height: 90%;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .preview-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 36px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <label for="dateSelect">投稿日リスト(Instagram):&nbsp;</label>
+      <select id="dateSelect"></select>
+    </div>
+    <div style="display: flex; align-items: center;">
+      <img class="user-photo" id="userPhoto" src="" />&nbsp;&nbsp;
+      <span class="user-name" id="userName"></span>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="sidebar" id="postList"></div>
+
+    <div class="detail">
+      <div id="postHeader"></div>
+      <div id="postBody"></div>
+    </div>
+  </div>
+
+  <!-- 图片预览弹窗 -->
+  <div id="imagePreview" class="preview-overlay" style="display: none;">
+    <span class="preview-close">&times;</span>
+    <img id="previewImg" src="" alt="Preview">
+  </div>
+
+  <script>
+    window.onload = function () {
+      const token = localStorage.getItem("authToken");
+      console.log("Saved token:", localStorage.getItem("authToken"));
+
+      if (!token) {
+        // No token found, redirect to login page
+        localStorage.removeItem("authToken");
+        window.location.href = "login.html";
+        return;
+      }
+    }
+
+    let posts = [];
+    let selectedPost = null;
+    let user_id = null;
+
+    async function initDates() {
+      const params = new URLSearchParams(window.location.search);
+      const userId = params.get("userId");
+      const userName = params.get("userName");
+      const userPhoto = decodeURIComponent(params.get("userPhoto"));
+      const dateSelect = document.getElementById("dateSelect");
+      const imgPhoto = document.getElementById("userPhoto")
+      const uName = document.getElementById("userName")
+      imgPhoto.src = `${userPhoto}`
+      uName.innerHTML = `${userName}`
+
+      const res = await fetch(`https://api.sns-ap.com/i/users/${userId}/postdates`, {
+        method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("authToken")
+          }
+      });
+
+      if (res.status != '200') {
+          localStorage.removeItem("authToken");
+          window.location.href = "login.html";
+          return;
+      }
+
+      const data = await res.json();
+      data.post_date_list.forEach(date => {
+        const o = document.createElement("option"); o.value = o.text = date;
+        dateSelect.append(o);
+      });
+      dateSelect.onchange = () => loadPosts(dateSelect.value);
+      if (dateSelect.options.length) loadPosts(dateSelect.value);
+    }
+
+    async function loadPosts(postDate) {
+      const params = new URLSearchParams(window.location.search);
+      const userId = params.get("userId");
+
+      if (!userId) {
+        alert("Missing user ID");
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://api.sns-ap.com/i/users/${userId}/tweets?post_date=${postDate}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("authToken")
+          }
+        });
+
+        if (res.status != '200') {
+          localStorage.removeItem("authToken");
+          window.location.href = "login.html";
+          return;
+        }
+
+        posts = await res.json();
+        displayPostList(posts);
+        const divHeader = document.getElementById("postHeader")
+        const divBody = document.getElementById("postBody")
+        divHeader.innerHTML=''
+        divBody.innerHTML=''
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+      }
+    }
+
+    function displayPostList(posts) {
+      const list = document.getElementById("postList");
+      list.innerHTML = "";
+
+      posts.forEach((post, index) => {
+        const div = document.createElement("div");
+        div.className = "post-item";
+        div.innerHTML = `
+          <p><strong>投稿日: ${post.post_date}</strong></p>
+          <p>
+            投稿ID: ${post.post_id}<br/>
+          </p>
+        `;
+        // div.onclick = () => showPostDetails(post, index);
+        div.onclick = () => {
+          // Remove previous selection
+          document.querySelectorAll(".post-item").forEach(el => el.classList.remove("selected"));
+          // Mark this item as selected
+          div.classList.add("selected");
+          // Show post details
+          showPostDetails(post, index);
+        };
+        list.appendChild(div);
+      });
+    }
+
+    async function showPostDetails(post, index) {
+      selectedPost = post;
+      const userId = new URLSearchParams(window.location.search).get("userId");
+      user_id = userId
+      const postId = post.post_id;
+      const postDate = post.post_date;
+
+      if (!userId || !postId || !postDate) {
+        alert("Missing post info");
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://api.sns-ap.com/i/users/${userId}/tweets/${postId}?post_date=${postDate}`,{
+          method: "GET",
+          headers: {
+            "Authorization": "Bearer " + localStorage.getItem("authToken")
+          }
+        });
+
+        if (res.status != '200') {
+          localStorage.removeItem("authToken");
+          window.location.href = "login.html";
+          return;
+        }
+
+        const data = await res.json();
+
+        // Update content fields
+        const divHeader = document.getElementById("postHeader")
+        const divBody = document.getElementById("postBody")
+        // const auditResultColor = data.audit_result === "NG" ? "red" : "inherit";
+        // const filterKeywordColor = data.filter_keyword !== "" ? "red" : "inherit";
+        // const filterImageColor = data.filter_image !== "" ? "red" : "inherit";
+
+        // const filterKeyword = data.filter_keyword === "" ? "なし" : data.filter_keyword
+        // const filterImage = data.filter_image === "" ? "なし" : data.filter_image
+        divHeader.innerHTML = `
+          <p><strong>
+            AI選定結果:&nbsp;<span id="aiSelected">${data.ai_selected}</span>
+          </strong></p>
+        `;
+
+        divBody.innerHTML = `
+          <b>投稿内容(日本語):</b><br /><br />
+          <textarea readonly id="postContentJA" class="auto-expand" placeholder="Select a post to view japanese content"></textarea>
+
+          <div class="photos" id="postPhotos"></div>
+          <div class="photos" id="postVideos"></div>
+        `;
+
+        // document.getElementById("postContentZH").value = data.post_zh || "(无中文内容)";
+        document.getElementById("postContentJA").value = data.post_ja || "(日本語コンテンツなし)";
+        const textareaJA = document.getElementById('postContentJA');
+        textareaJA.style.height = 'auto';
+        textareaJA.style.height = textareaJA.scrollHeight + 'px';
+
+        // Update images
+        const photos = document.getElementById("postPhotos");
+        photos.innerHTML = "";
+
+        const previewOverlay = document.getElementById("imagePreview");
+        const previewImg = document.getElementById("previewImg");
+        const closeBtn = document.querySelector(".preview-close");
+
+        if (Array.isArray(data.images)) {
+          data.images.forEach(url => {
+            const img = document.createElement("img");
+            img.src = url;
+            img.alt = "Post image";
+            img.style.cursor = "pointer";
+
+            // 左键点击 → 打开预览
+            img.addEventListener("click", () => {
+              previewImg.src = url;
+              previewOverlay.style.display = "flex";
+            });
+
+            photos.appendChild(img);
+          });
+        }
+
+        // 关闭预览（×）
+        closeBtn.addEventListener("click", () => {
+          previewOverlay.style.display = "none";
+          previewImg.src = "";
+        });
+
+        // 点击黑色背景也可关闭
+        previewOverlay.addEventListener("click", (e) => {
+          if (e.target === previewOverlay) {
+            previewOverlay.style.display = "none";
+            previewImg.src = "";
+          }
+        });
+
+        // Display videos
+        const videos = document.getElementById("postVideos");
+        videos.innerHTML = "";
+        if (Array.isArray(data.videos)) {
+          data.videos.forEach(url => {
+            const video = document.createElement("video");
+            video.src = url;
+            video.controls = true;
+            video.preload = "metadata";
+            videos.appendChild(video);
+          });
+        }
+
+      } catch (err) {
+        console.error("Failed to load post details:", err);
+        alert("Error loading post details.");
+      }
+    }
+
+    async function approvePost() {
+      if (!selectedPost) {
+        alert("Please select a post first.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://api.sns-ap.com/x/users/${user_id}/tweets/${selectedPost.post_id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("authToken")
+          },
+          body: JSON.stringify({
+            post_status: "approved"
+          })
+        });
+
+        if (res.status === 200) {
+          document.getElementById("postStatus").innerText = "approved"
+          alert("Post approved successfully!");
+          selectedPost.status = "approved";
+        } else {
+          alert("Failed to approve post.");
+        }
+      } catch (err) {
+        console.error("Error approving post:", err);
+        alert("Error approving post.");
+      }
+    }
+
+    async function savePost() {
+      if (!selectedPost) {
+        alert("Please select a post first.");
+        return;
+      }
+
+      const updatedContent = document.getElementById("postContentZH").value;
+
+      try {
+        const res = await fetch(`https://api.sns-ap.com/x/users/${user_id}/tweets/${selectedPost.post_id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("authToken")
+          },
+          body: JSON.stringify({
+            post_date: selectedPost.post_date,
+            post_status: "updated",
+            updates: updatedContent
+          })
+        });
+
+        if (res.status === 200) {
+          document.getElementById("postStatus").innerText = "updated"
+          alert("Post updated successfully!");
+          selectedPost.status = updatedContent;
+        } else {
+          alert("Failed to update post.");
+        }
+      } catch (err) {
+        console.error("Error updating post:", err);
+        alert("Error saving post.");
+      }
+    }
+
+    // loadPosts();
+    initDates();
+  </script>
+</body>
+</html>

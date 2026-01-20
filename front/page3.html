@@ -1,0 +1,89 @@
+<head>
+  <style>
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    .user-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: left;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .user-card {
+      # background: #FAE7E7;
+      background: #CCE5FF;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 16px;
+      width: 100%;
+      max-width: 300px;
+      box-sizing: border-box;
+      transition: transform 0.2s;
+    }
+
+    .user-card:hover {
+      transform: scale(1.02);
+    }
+
+    .user-photo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 12px;
+    }
+
+    .user-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .user-profile {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .user-link a {
+      text-decoration: none;
+      color: #1da1f2;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .user-card {
+        max-width: 90%;
+      }
+    }
+
+    .bind-button-container {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    #bindWeiboBtn {
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #ff4d4f;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #bindWeiboBtn:hover {
+      background-color: #e04344;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="user-list" id="userList"></div>
+
+</body>
